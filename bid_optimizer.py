@@ -216,9 +216,12 @@ class BidOptimizer:
             (df["keyword_score"] / total_score) * budget / df["expected_clicks"]
         )
 
+        # Floor the stability ceiling to 2 dp so rounding recommended_bid never
+        # produces a value above current_avg_bid × STABILITY_HIGH in the output.
+        stability_upper = (df["current_avg_bid"] * STABILITY_HIGH * 100).apply(np.floor) / 100
         df["raw_bid"] = df["raw_bid"].clip(
             lower=df["current_avg_bid"] * STABILITY_LOW,
-            upper=df["current_avg_bid"] * STABILITY_HIGH,
+            upper=stability_upper,
         )
 
         df["floor_bid"] = df["floor_bid_comp"].clip(lower=BID_MIN)
