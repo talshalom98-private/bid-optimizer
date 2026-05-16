@@ -165,7 +165,7 @@ Before implementing anything, the data must answer specific questions that calib
 
 ### Q6 — Budget Utilisation (Most Critical Finding)
 
-**Finding:** Every campaign is over its daily budget. Range: 1.6× (Beauty) to 4.8× (Pet Supplies, $572/day against a $120 budget). No exceptions.
+**Finding:** Every campaign is over its daily budget, every single day of the 30-day window. No exceptions. This means the historical ROAS baseline is computed on unconstrained, over-budget spend — money-losing keywords were running freely alongside profitable ones, dragging the portfolio average down.
 
 **Decision:** Budget enforcement is the dominant output force. Every recommended bid will be substantially lower than the current bid. The accuracy of `avg_daily_clicks × recommended_bid` as projected spend is critical — this directly drives whether the budget constraint is met.
 
@@ -597,7 +597,7 @@ Improvement:                        +150.9%
 
 ROAS improves across all 10 campaigns — no campaign is sacrificed to boost another.
 
-**Why this is a strong proof:** the historical ROAS baseline (0.88×) was computed from campaigns spending 1.6×–4.8× their daily budgets — every keyword running unconstrained, money-losing ones included. The algorithm achieves 2.22× ROAS while spending *within* budget. Better efficiency and budget compliance simultaneously, not a trade-off.
+**Important context on the baseline:** the historical ROAS was computed on over-budget spend — all campaigns were exceeding their daily budgets throughout the 30-day window, with money-losing keywords running unconstrained alongside profitable ones. The improvement shown here reflects both effects: enforcing the budget and concentrating what remains on high-efficiency keywords. Part of the gain is mechanical (any budget cut would improve ROAS); the algorithm's contribution is the asymmetric allocation — protecting profitable keywords while cutting wasteful ones first. The proper way to isolate that contribution is a live A/B test against a control group on manual bidding, as described in Part B.
 
 **How the improvement happens:** the algorithm stops spending money on keywords that lose money (cuts their bids to the $0.20 floor) and gives that budget to keywords that are already profitable. Spending less in total but only on the right keywords produces a higher return per dollar — which is exactly what ROAS measures.
 
