@@ -55,6 +55,8 @@ ROAS = Revenue / Spend. Maximize it. No target to hit — higher is always bette
 **3. Bid stability — advertiser trust.**  
 No keyword changes by more than ±50% per cycle. Erratic bid swings erode advertiser confidence faster than any optimisation mistake.
 
+> **Constraint hierarchy:** Budget (1) overrides stability (3). When the budget slash loop must drive a keyword's bid to the marketplace floor ($0.20–$0.26), it will go below `current_avg_bid × 0.50` — this is intentional and declared, not a violation. Every such keyword is flagged in the `reason` column.
+
 **4. Explainability.**  
 Every recommendation includes a human-readable `reason` column.
 

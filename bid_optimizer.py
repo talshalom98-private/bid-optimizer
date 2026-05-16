@@ -18,6 +18,12 @@ from scipy.stats import rankdata
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity as cos_sim
 
+# Constraint hierarchy (highest priority first):
+#   1. Campaign daily budget  — hard ceiling, never violated
+#   2. Marketplace bounds     — BID_MIN / BID_MAX, always enforced
+#   3. Stability cap          — STABILITY_LOW/HIGH, overridden by (1) and (2)
+# A bid driven below current_avg_bid × STABILITY_LOW by the budget slash loop
+# is not a stability violation — budget takes explicit precedence.
 BID_MIN        = 0.20
 BID_MAX        = 15.00
 STABILITY_LOW  = 0.50
