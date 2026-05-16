@@ -504,7 +504,16 @@ Programmatic `assert` checks prove 100% compliance with every hard constraint:
 - **Marketplace bounds:** `min(recommended_bid) ≥ $0.20` and `max(recommended_bid) ≤ $15.00`
 - **Stability cap:** no bid exceeds `current_avg_bid × 1.50` or falls below `current_avg_bid × 0.50` without justification
 
-**Important nuance on the stability lower bound:** keywords driven to their marketplace floor (`$0.20–$0.26`) by the budget constraint may sit below `current_avg_bid × 0.50`. This is not a violation — it is correct behaviour. The budget constraint takes priority: if a campaign cannot reach compliance without driving some keywords to the marketplace minimum, that is the right outcome. These cases are flagged explicitly in the reason column and counted separately in the assertion output.
+**Results:**
+```
+min recommended_bid = $0.20   (floor $0.20)     ✓
+max recommended_bid = $4.09   (ceiling $15.00)  ✓
+Upper-cap violations: 0                          ✓
+Lower-cap violations (true): 0                   ✓
+Floor-forced reductions: 101 keywords (budget constraint drove bids to marketplace floor — expected)
+```
+
+**Important nuance on the stability lower bound:** 101 keywords were driven to their marketplace floor (`$0.20–$0.26`) by the budget constraint. These sit below `current_avg_bid × 0.50` but are not violations — the budget constraint takes priority. Each is flagged in the reason column.
 
 ---
 
@@ -517,7 +526,23 @@ A dual-bar chart shows all campaigns side-by-side:
 - **Optimized bar** — `sum(recommended_bid × avg_daily_clicks)` per campaign
 - **Red dashed line** — the hard daily budget cap
 
-Every optimized bar sits below the red line. The asymmetric slash achieved this by cutting the lowest-score keywords first — not by scaling all bids uniformly.
+**Results — all 10 campaigns brought within budget:**
+
+| Campaign | Historical spend | vs budget | Optimized spend | vs budget |
+|---|---|---|---|---|
+| Beauty & Personal Care | $571/day | 1.6× | $350/day | 1.00× ✓ |
+| Electronics Deals | $836/day | 1.7× | $500/day | 1.00× ✓ |
+| Fitness & Outdoors | $601/day | 3.0× | $200/day | 1.00× ✓ |
+| Garden & Tools | $345/day | 4.3× | $80/day | 1.00× ✓ |
+| Headphones & Audio | $684/day | 2.3× | $300/day | 1.00× ✓ |
+| Home & Kitchen | $688/day | 1.7× | $400/day | 1.00× ✓ |
+| Kids & Toys | $330/day | 2.2× | $150/day | 1.00× ✓ |
+| Office Supplies | $471/day | 2.6× | $180/day | 1.00× ✓ |
+| Pet Supplies | $572/day | 4.8× | $120/day | 1.00× ✓ |
+| Phone Accessories | $748/day | 3.0× | $250/day | 1.00× ✓ |
+| **Portfolio total** | **$5,845/day** | **2.3× avg** | **$2,529/day** | **1.00×** |
+
+Total daily spend reduced from $5,845 to $2,529 — a 57% reduction — while concentrating the remaining budget on high-ROAS keywords.
 
 ---
 
@@ -535,16 +560,34 @@ predicted_revenue   = predicted_spend × revenue_per_click × (recommended_bid /
 
 The `(bid_new / bid_old)^0.1` term is a **diminishing-returns elasticity factor**. It makes the simulation conservative: raising a bid by 50% only increases revenue efficiency by ~4%, not 50%. This penalises aggressive upward moves and prevents the simulation from overstating the improvement.
 
-**Result:**
+**Results:**
+
 ```
-Predicted portfolio ROAS  >  Actual historical ROAS
+Actual historical portfolio ROAS:    0.884x   (campaigns spending 1.6x–4.8x over budget)
+Predicted optimized portfolio ROAS:  2.218x
+Improvement:                        +150.9%
 ```
 
-**Why this comparison is stronger than it first appears:**
+**Per-campaign ROAS improvement:**
 
-The historical ROAS baseline was computed from campaigns spending **1.6×–4.8× their daily budgets** (EDA Q6). That means the historical data already represents unconstrained spend — every keyword was running, money-losing ones included, with no budget ceiling enforced. The algorithm achieves higher ROAS while simultaneously spending *within* budget. This is the real proof: **better efficiency AND budget compliance simultaneously**, not a trade-off between the two.
+| Campaign | Actual ROAS | Predicted ROAS | Change |
+|---|---|---|---|
+| Fitness & Outdoors | 0.77× | 2.31× | +198% |
+| Electronics Deals | 0.95× | 2.59× | +173% |
+| Office Supplies | 0.64× | 1.69× | +165% |
+| Phone Accessories | 0.82× | 2.10× | +158% |
+| Beauty & Personal Care | 0.87× | 2.22× | +154% |
+| Headphones & Audio | 0.95× | 2.37× | +149% |
+| Garden & Tools | 0.94× | 2.26× | +141% |
+| Kids & Toys | 1.26× | 2.78× | +120% |
+| Home & Kitchen | 0.80× | 1.75× | +119% |
+| Pet Supplies | 0.98× | 2.01× | +105% |
 
-The mechanism: keywords consuming budget below campaign-average ROAS had their bids cut toward the $0.20 floor. The freed budget was reallocated to high-score keywords proportionally. Even with the conservative elasticity penalty, concentrating spend on efficient keywords raises portfolio ROAS despite the overall spend reduction. A per-campaign breakdown confirms the improvement holds across most individual campaigns, not just in aggregate.
+ROAS improves across all 10 campaigns — no campaign is sacrificed to boost another.
+
+**Why this is a strong proof:** the historical ROAS baseline (0.88×) was computed from campaigns spending 1.6×–4.8× their daily budgets — every keyword running unconstrained, money-losing ones included. The algorithm achieves 2.22× ROAS while spending *within* budget. Better efficiency and budget compliance simultaneously, not a trade-off.
+
+The mechanism: keywords below campaign-average ROAS had their bids cut to the $0.20 floor; freed budget was reallocated to high-score keywords. Even with the conservative elasticity decay penalty, concentrating spend on efficient keywords raises portfolio ROAS despite the 57% overall spend reduction.
 
 **Known limitations of this proxy:**
 - Revenue-per-click is assumed constant — real auctions are dynamic and competitor bids react
