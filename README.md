@@ -12,6 +12,7 @@ python main.py
 
 Outputs `bid_recommendations.csv` — one recommended bid per keyword.  
 No API key needed — Claude metadata is pre-populated in `keyword_metadata_cache.json`.  
+If running with different data, set `ANTHROPIC_API_KEY` in your environment for full LLM classification of new keywords; without it, unknown keywords fall back to mid-range defaults and the algorithm still runs.  
 Full walkthrough with code, visualisations, and decisions: `jupyter notebook bid_optimizer.ipynb`
 
 ---
