@@ -587,7 +587,7 @@ ROAS improves across all 10 campaigns — no campaign is sacrificed to boost ano
 
 **Why this is a strong proof:** the historical ROAS baseline (0.88×) was computed from campaigns spending 1.6×–4.8× their daily budgets — every keyword running unconstrained, money-losing ones included. The algorithm achieves 2.22× ROAS while spending *within* budget. Better efficiency and budget compliance simultaneously, not a trade-off.
 
-The mechanism: keywords below campaign-average ROAS had their bids cut to the $0.20 floor; freed budget was reallocated to high-score keywords. Even with the conservative elasticity decay penalty, concentrating spend on efficient keywords raises portfolio ROAS despite the 57% overall spend reduction.
+**How the improvement happens:** the algorithm stops spending money on keywords that lose money (cuts their bids to the $0.20 floor) and gives that budget to keywords that are already profitable. Spending less in total but only on the right keywords produces a higher return per dollar — which is exactly what ROAS measures.
 
 **Known limitations of this proxy:**
 - Revenue-per-click is assumed constant — real auctions are dynamic and competitor bids react
