@@ -7,3 +7,6 @@ dist/
 build/
 .DS_Store
 bid_recommendations.csv
+.claude/
+homework_assignment.pdf
+recent_hw/

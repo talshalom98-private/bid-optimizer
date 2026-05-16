@@ -600,39 +600,36 @@ These limitations are inherent to any offline bid optimizer. The conservative el
 
 ## Part B — Reasoning About Uncertainty
 
-### How the algorithm handles sparse data
+**Sparse data.** The confidence score — `sqrt(min(clicks/30,1) × min(days/7,1))` — gates how much behavioral vs. semantic signal drives the keyword's bid. At `confidence = 0`, the score is 100% semantic: a KNN prior over the k=5 most similar keywords in embedding space (similarity-weighted average of their actual historical ROAS) plus an LLM specificity signal from the keyword's distance from the portfolio centroid. Claude's margin and funnel modifiers apply regardless of confidence level. The ±50% stability cap ensures a miscalibrated prior causes a modest one-cycle over-bid, not a budget event — and as data accumulates, the weight shifts automatically back to behavioral signal. No special-case logic anywhere.
 
-The confidence-weighted hybrid score handles this continuously. `confidence = 0` means the LLM prior is the sole signal — the keyword still receives a principled budget allocation based on semantic commercial potential, not zero. As data accumulates over cycles, `confidence` rises automatically and the blend shifts toward behavioural signal. No special-case logic required.
+**Production failure modes.** (1) *Feedback loops:* bid raised → noisy week with no conversions → score falls → bid cut → less traffic → score falls further. The ±50% cap slows oscillation; a production system should also hold bids steady after two consecutive direction reversals on the same keyword. (2) *Data pipeline corruption:* duplicate rows inflate ROAS; a tracking outage zeroes revenue for two days, triggering aggressive cuts to keywords that actually earned. Mitigation: pre-cycle validation on row count, date coverage, and revenue/spend ratio bounds — hold all bids and alert on failure. (3) *Budget infeasibility:* if a campaign's minimum-floor spend (n keywords × $0.20 floor × avg clicks) exceeds its daily budget, no valid bid set exists. The algorithm sets all bids to floor and flags it, but production needs a human alert — this is a budget configuration problem, not an optimizer problem. (4) *Seasonality:* the 30-day flat aggregation is blind to seasonal trends. December holiday ROAS carried into January over-bids seasonal keywords and under-bids evergreen ones. A production rollout would add a recency-weighted ROAS window.
 
-### What could go wrong in production
+**Measuring success.** Primary metric: portfolio ROAS (revenue / spend) vs. a held-out control group of campaigns on manual bidding. Without a holdout, any ROAS change is confounded by seasonality and competitor activity. Timeline: week 1 — do not report ROAS, Amazon's attribution window is up to 14 days so early numbers are structurally understated; week 2 — first attributable read, verify budget compliance before interpreting efficiency numbers; weeks 3–4 — first statistically meaningful ROAS comparison vs. holdout. Secondary signals: budget utilisation rate per campaign, bid oscillation rate, and floor-hit rate. The offline simulation showed 0.884× → 2.218× ROAS under conservative elasticity assumptions; a live target of ≥+30% lift over the holdout by week 4 with zero budget violations is a sensible first deployment gate.
 
-**Feedback loops.** Raise bid → more impressions → noisy week with no conversions → score falls → bid cut → fewer impressions. The ±50% cap slows oscillation; a production system should also flag keywords that reverse direction in consecutive cycles.
-
-**Data pipeline failures.** Duplicate rows, missing days, or tracking outages cause confidently wrong scores. Mitigation: strict input validation before every cycle (row count bounds, date coverage, revenue/spend ratio checks). On validation failure: hold all bids, alert.
-
-**LLM model drift.** An upstream model update shifts `estimated_efficiency` values discontinuously. Mitigation: version-lock the model. Re-enrich all keywords on any model change.
-
-**LLM miscalibration on niche products.** World-knowledge priors can be wrong for unusual categories. Flag LLM-primary recommendations in the `reason` column for manual review in early cycles.
-
-### How to measure success
-
-**Primary:** Portfolio ROAS (total revenue / total spend) week-over-week post-launch.
-
-**Secondary:** Budget utilisation per campaign, bid oscillation rate (direction reversals), percentage of keywords hitting hard bounds.
-
-**Evaluation horizon:** Minimum four weeks of live data. Amazon attribution windows up to 14 days mean week-1 ROAS is understated.
-
-> Implementation details: **Section 6** in [bid_optimizer.ipynb](bid_optimizer.ipynb)
+> Implementation details and formula derivations: **Section 8** in [bid_optimizer.ipynb](bid_optimizer.ipynb)
 
 ---
 
 ## Part C — Cold-Start for New Keywords
 
-Cold-start is native to the architecture — no special-case logic required. A zero-history keyword has `confidence = 0`, so `keyword_score = llm_efficiency` entirely. It participates in the same score-weighted budget allocation as every other keyword. The LLM prior determines its initial budget share; as clicks and conversions accumulate over subsequent cycles, the blend automatically shifts toward behavioural signal.
+**How the algorithm handles zero-history keywords.** A new campaign with 50 keywords and no click history has `confidence = 0` for every keyword, so the hybrid score reduces to:
 
-**Bootstrapping a new campaign:** provide the new keywords to the LLM enrichment step, specify expected daily clicks (or use a conservative default), and run the allocation. The system naturally gives more budget to high-intent keywords and less to informational ones — even with zero data.
+```
+keyword_score = 0.60 × neighbor_roas_norm + 0.40 × llm_specificity
+              + llm_margin_modifier + llm_funnel_modifier
+```
 
-> Worked example with a 5-keyword new campaign: **Section 7** in [bid_optimizer.ipynb](bid_optimizer.ipynb)
+`neighbor_roas_norm` is the similarity-weighted average ROAS of the k=5 most semantically similar keywords *already in the portfolio* — so even brand-new keywords get a cold-start prior grounded in real campaign data, not world-knowledge alone. `llm_specificity` (centroid distance in embedding space) differentiates long-tail high-intent queries from generic head terms. Claude's margin and funnel modifiers add commercial context. The result: "premium noise cancelling headphones men's" starts with a meaningfully higher score than "what is bluetooth" before a single click is recorded.
+
+**The exploration/efficiency tension.** The natural outcome of the above is that all 50 new keywords receive bids derived from moderate, undifferentiated priors — and moderate bids on an unknown keyword produce few impressions, which means confidence stays near zero for many cycles. The system is efficient (it doesn't waste budget on keywords the prior scores poorly) but slow to learn: a keyword the prior underestimates may never receive enough traffic to prove its actual value.
+
+The correct response is an explicit exploration budget for the first phase. For cycles 1–7, reserve 20–25% of the campaign's daily budget as a uniform exploration allocation spread evenly across all keywords, regardless of score. This guarantees every keyword reaches at least a minimum impression floor. The remaining 75–80% follows the score-weighted allocation as normal. After 7 days, most keywords have accumulated enough clicks and active days for `confidence` to become meaningful, and the exploration allocation is retired — the optimizer takes over fully with real behavioral signal.
+
+This is deliberately simple: no Thompson sampling, no bandit arms. The reason is that the confidence score already encodes the exploration/exploitation transition continuously. The flat exploration slice just ensures the transition happens within a week rather than over many cycles, at a known, bounded cost (25% of budget × 7 days).
+
+**Expected trajectory.** Days 1–7: uniform exploration, KNN/LLM priors dominate score. Days 8–14: behavioral signal starts mixing in for keywords with sufficient traffic; worst performers begin receiving less budget. Week 3+: high-confidence keywords drive the allocation; the cold-start phase is effectively over and the system behaves identically to an established campaign.
+
+> Score formula and confidence mechanics: **Section 8** in [bid_optimizer.ipynb](bid_optimizer.ipynb)
 
 ---
 
