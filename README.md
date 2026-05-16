@@ -632,27 +632,3 @@ This is deliberately simple: no Thompson sampling, no bandit arms. The reason is
 
 > Score formula and confidence mechanics: **Section 8** in [bid_optimizer.ipynb](bid_optimizer.ipynb)
 
----
-
-## Key Assumptions
-
-| Assumption | Reasoning |
-|---|---|
-| Daily batch refresh | Daily data granularity + CSV output + one-shot script |
-| Full 30-day window | Operational optimisation — all data is relevant, no future leakage risk |
-| `current_avg_bid` = mean of `current_bid` over 30 days | More stable than last-day bid; used as stability anchor for ±50% cap |
-| Absent days = informative absence | Budget exhausted or auction lost, not random |
-| Zero-revenue rows = valid negative signal | Keyword ran, nobody converted |
-| Budget enforcement projects `avg_daily_clicks × bid` | Assumes click volume is stable; large bid changes may shift click volume in practice |
-
----
-
-## Trade-offs
-
-**Proportional allocation over optimal LP.** Score-weighted allocation is O(n) and fully interpretable. A true optimum would solve `max ∑ ROAS_k·spend_k subject to ∑ spend_k ≤ budget` — more precise but opaque and harder to explain to advertisers.
-
-**±50% cap accepts slower convergence.** A severely undervalued keyword needs multiple cycles to reach its optimal bid. Intentional — large jumps produce noisy ROAS estimates.
-
-**LLM prior is world-knowledge, not client-specific.** Niche or seasonal categories may be miscalibrated. Flagged in `reason` column.
-
-**Safety-net proportional scaling.** When stability caps push projected spend above budget, a uniform scale-down is applied as a last resort. Acceptable because the score-ranked ordering is already protected by the allocation step.
