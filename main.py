@@ -2,7 +2,16 @@
 Entry point for the bid optimizer.
 The full algorithm, explanations, and reasoning live in bid_optimizer.ipynb.
 This script imports the core optimizer and runs it on campaign_data.csv.
+Requires Python >= 3.9.
 """
+import sys
+
+if sys.version_info < (3, 9):
+    sys.exit(
+        f"Python 3.9+ required (found {sys.version}). "
+        "Run: py -3.9 main.py  or  python3 main.py"
+    )
+
 import pandas as pd
 from bid_optimizer import BidOptimizer
 

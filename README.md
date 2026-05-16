@@ -2,6 +2,8 @@
 
 ## Setup & Running
 
+**Requires Python 3.9+**
+
 ```bash
 git clone <repo-url>
 pip install -r requirements.txt
@@ -9,6 +11,7 @@ python main.py
 ```
 
 Outputs `bid_recommendations.csv` — one recommended bid per keyword.  
+No API key needed — Claude metadata is pre-populated in `keyword_metadata_cache.json`.  
 Full walkthrough with code, visualisations, and decisions: `jupyter notebook bid_optimizer.ipynb`
 
 ---
