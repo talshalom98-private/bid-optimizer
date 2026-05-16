@@ -1,0 +1,912 @@
+{
+  "air fryer": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "consideration",
+    "competition_intensity": "high"
+  },
+  "aluminum foil": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "aromatherapy diffuser": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "consideration",
+    "competition_intensity": "medium"
+  },
+  "baby monitor camera": {
+    "margin_tier": "premium",
+    "funnel_stage": "consideration",
+    "competition_intensity": "high"
+  },
+  "baking sheet set": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "bath bomb set": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "bath mat non slip": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "bath towel set": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "bike lock": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "consideration",
+    "competition_intensity": "medium"
+  },
+  "binder clips": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "bird feeder": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "consideration",
+    "competition_intensity": "low"
+  },
+  "blender smoothie": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "consideration",
+    "competition_intensity": "high"
+  },
+  "bluetooth earbuds": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "consideration",
+    "competition_intensity": "high"
+  },
+  "bluetooth speaker portable": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "consideration",
+    "competition_intensity": "high"
+  },
+  "bookshelf small": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "consideration",
+    "competition_intensity": "medium"
+  },
+  "broom dustpan set": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "cable management": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "camping lantern": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "consideration",
+    "competition_intensity": "medium"
+  },
+  "can opener electric": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "car phone mount": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "car vacuum cleaner": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "consideration",
+    "competition_intensity": "medium"
+  },
+  "cast iron skillet": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "cat litter": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "chip clips": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "coaster set": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "coffee maker": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "consideration",
+    "competition_intensity": "high"
+  },
+  "coloring book kids": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "command strips": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "curtain rod": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "cutting board bamboo": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "desk fan quiet": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "desk organizer": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "desk pad leather": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "dish rack": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "dog bed large": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "dog food grain free": {
+    "margin_tier": "premium",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "dog leash retractable": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "dog treats natural": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "door mat outdoor": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "door stopper": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "drawer organizer": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "egg cooker electric": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "electric blanket": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "electric kettle": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "electric shaver": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "consideration",
+    "competition_intensity": "high"
+  },
+  "electric toothbrush kids": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "envelope pack": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "eraser pack": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "exercise ball": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "consideration",
+    "competition_intensity": "medium"
+  },
+  "extension cord outdoor": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "face wash cleanser": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "first aid kit": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "flashlight tactical": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "fly swatter": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "foam roller": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "folder organizer": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "food storage containers": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "gaming headset rgb": {
+    "margin_tier": "premium",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "garden hose": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "consideration",
+    "competition_intensity": "medium"
+  },
+  "garlic press": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "glue stick": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "hair clips women": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "hair dryer": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "consideration",
+    "competition_intensity": "high"
+  },
+  "hand cream moisturizer": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "hand sanitizer bulk": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "hand towel set": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "hdmi cable": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "highlighter set": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "hiking boots men": {
+    "margin_tier": "premium",
+    "funnel_stage": "consideration",
+    "competition_intensity": "high"
+  },
+  "ice cube tray": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "ice pack lunch": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "index cards": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "instant pot": {
+    "margin_tier": "premium",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "insulated lunch bag": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "jar opener": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "jump rope fitness": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "key finder bluetooth": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "kids puzzle": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "kitchen knife set": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "kitchen timer digital": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "label maker": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "laptop sleeve 15": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "laptop stand": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "laundry basket": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "lawn mower": {
+    "margin_tier": "premium",
+    "funnel_stage": "consideration",
+    "competition_intensity": "high"
+  },
+  "led desk lamp": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "lego set": {
+    "margin_tier": "premium",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "lint roller": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "luggage tag": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "lunch box adult": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "magnifying glass": {
+    "margin_tier": "commodity",
+    "funnel_stage": "consideration",
+    "competition_intensity": "low"
+  },
+  "makeup brush set": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "makeup organizer": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "marker set": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "massage gun": {
+    "margin_tier": "premium",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "measuring cups set": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "mechanical keyboard": {
+    "margin_tier": "premium",
+    "funnel_stage": "consideration",
+    "competition_intensity": "high"
+  },
+  "mechanical pencil": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "moisturizer face": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "monitor 27 inch": {
+    "margin_tier": "premium",
+    "funnel_stage": "consideration",
+    "competition_intensity": "high"
+  },
+  "mouse pad large": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "night light kids": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "noise cancelling": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "awareness",
+    "competition_intensity": "high"
+  },
+  "noise machine sleep": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "notebook journal": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "office chair ergonomic": {
+    "margin_tier": "premium",
+    "funnel_stage": "consideration",
+    "competition_intensity": "high"
+  },
+  "oven mitts": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "over ear headphones": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "consideration",
+    "competition_intensity": "high"
+  },
+  "packing cubes travel": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "paper clips": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "parchment paper": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "pencil sharpener": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "pepper grinder": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "pet bed small": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "phone case iphone": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "phone charger fast": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "phone tripod": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "picture frame set": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "pillow memory foam": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "plant pot indoor": {
+    "margin_tier": "commodity",
+    "funnel_stage": "consideration",
+    "competition_intensity": "low"
+  },
+  "portable fan mini": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "portable speaker waterproof": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "pot holder": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "power drill cordless": {
+    "margin_tier": "premium",
+    "funnel_stage": "consideration",
+    "competition_intensity": "high"
+  },
+  "premium leather wallet": {
+    "margin_tier": "premium",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "protein powder": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "consideration",
+    "competition_intensity": "high"
+  },
+  "puzzle 1000 piece": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "rain jacket women": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "consideration",
+    "competition_intensity": "high"
+  },
+  "resistance bands": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "resistance loop bands": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "reusable water bottle": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "rubber bands": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "ruler set": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "running shoes men": {
+    "margin_tier": "premium",
+    "funnel_stage": "consideration",
+    "competition_intensity": "high"
+  },
+  "salad spinner": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "scissors heavy duty": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "screen protector": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "shoe rack": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "shower head rain": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "smart plug wifi": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "smart watch fitness": {
+    "margin_tier": "premium",
+    "funnel_stage": "consideration",
+    "competition_intensity": "high"
+  },
+  "soap dispenser": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "solar garden lights": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "consideration",
+    "competition_intensity": "medium"
+  },
+  "spice rack organizer": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "sponge holder": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "stamp pad ink": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "standing desk converter": {
+    "margin_tier": "premium",
+    "funnel_stage": "consideration",
+    "competition_intensity": "high"
+  },
+  "stapler": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "sticky notes": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "storage bins fabric": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "sunscreen spf 50": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "surge protector": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "tablet stand": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "tape dispenser": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "tape measure": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "tea kettle stovetop": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "tension rod curtain": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "tool set home": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "consideration",
+    "competition_intensity": "medium"
+  },
+  "toothbrush holder": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "towel rack": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "toy dinosaur": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "trash bags tall": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "travel backpack": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "consideration",
+    "competition_intensity": "high"
+  },
+  "usb c cable": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "usb hub": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "velcro strips": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  },
+  "vitamin c serum": {
+    "margin_tier": "premium",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "wall art canvas": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "consideration",
+    "competition_intensity": "medium"
+  },
+  "wall clock modern": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "consideration",
+    "competition_intensity": "medium"
+  },
+  "wall hooks adhesive": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "water bottle insulated": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "water filter pitcher": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "whiteboard magnetic": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "wine opener": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "wireless charger pad": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "wireless headphones": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "consideration",
+    "competition_intensity": "high"
+  },
+  "wireless mouse": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "yoga block": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "yoga mat": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "consideration",
+    "competition_intensity": "high"
+  },
+  "yoga pants women": {
+    "margin_tier": "mid-range",
+    "funnel_stage": "decision",
+    "competition_intensity": "high"
+  },
+  "yoga strap": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "medium"
+  },
+  "zip ties": {
+    "margin_tier": "commodity",
+    "funnel_stage": "decision",
+    "competition_intensity": "low"
+  }
+}

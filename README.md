@@ -1,39 +1,541 @@
-# Bid Optimizer — Algorithm Developer Home Assignment
+# Bid Optimization Engine
 
-## Overview
-A keyword bid optimization system for e-commerce advertising campaigns, targeting ROAS (Return on Ad Spend) improvement while respecting budget and bid constraints.
+## Setup & Running
+
+```bash
+git clone <repo-url>
+pip install -r requirements.txt
+python main.py
+```
+
+Outputs `bid_recommendations.csv` — one recommended bid per keyword.  
+Full walkthrough with code, visualisations, and decisions: `jupyter notebook bid_optimizer.ipynb`
+
+---
 
 ## Project Structure
+
 ```
 bid-optimizer/
-├── bid_optimizer.ipynb   # Main notebook: full solution with explanations
-├── main.py               # CLI entry point: runs the optimizer and prints results
-├── campaign_data.csv     # Input: 30-day historical keyword performance data
-├── requirements.txt      # Python dependencies
+├── main.py                # Entry point
+├── bid_optimizer.py       # Core algorithm module
+├── bid_optimizer.ipynb    # Full DS walkthrough: EDA, decisions, implementation
+├── campaign_data.csv      # 30 days of keyword performance data
+├── requirements.txt
 └── README.md
 ```
 
-## Setup
-```bash
-pip install -r requirements.txt
+---
+
+## 1. Task Objective & Business Context
+
+### What Are We Building
+
+Feedvisor manages advertising campaigns for brands on Amazon. The optimizer sets a **maximum cost-per-click (CPC) bid** per keyword — a standing instruction that stays in effect until the next daily cycle.
+
+**Input:** `campaign_data.csv` — 30 days of daily keyword-level data (~200 keywords, 10 campaigns).  
+**Output:** One recommended bid per unique keyword for the next daily cycle.
+
+The bid is a lever with two opposing forces:
+- Too low → lost auctions, fewer impressions, no revenue
+- Too high → expensive clicks, high spend per sale, low ROAS
+
+### Business Constraints — Priority Order
+
+**1. Budget — hard ceiling, non-negotiable.**  
+Total projected daily spend per campaign must never exceed the campaign's daily budget. EDA shows all 10 campaigns are currently 1.6×–4.8× over budget. Enforcing this is the primary job.
+
+**2. ROAS — the north-star metric.**  
+ROAS = Revenue / Spend. Maximize it. No target to hit — higher is always better. Budget is the only ceiling.
+
+**3. Bid stability — advertiser trust.**  
+No keyword changes by more than ±50% per cycle. Erratic bid swings erode advertiser confidence faster than any optimisation mistake.
+
+**4. Explainability.**  
+Every recommendation includes a human-readable `reason` column.
+
+**5. Graceful handling of sparse data.**  
+Keywords with thin history must receive principled estimates — not silence.
+
+---
+
+## 2. How Business Constraints Shape the Algorithm
+
+### 2.1 Portfolio Problem, Not Pointwise Prediction
+
+**All keywords in a campaign share the same daily budget pool.** Setting keyword A's bid independently of keywords B, C, D is wrong by construction — the sum will exceed the budget and any subsequent uniform cut destroys the efficiency signal.
+
+**The correct framing:** given a fixed daily budget per campaign, distribute it across keywords in proportion to each keyword's efficiency, so that the most profitable keywords receive more spend and the least profitable receive less.
+
+> Bids are not predicted in isolation — they are derived from how much budget each keyword *deserves* relative to its campaign peers.
+
+### 2.2 Full 30-Day Window — No Train/Test Split
+
+A train/test split is correct for forecasting problems where we estimate generalisation to future time. This is not a forecasting problem. We are generating one operational recommendation per keyword for the *next* daily cycle. The right inputs are the best available performance estimates — which means using all 30 days, not discarding the most recent 9 (the 30% most valuable signal) to create an artificial holdout.
+
+Model quality is measured by whether the budget constraint is satisfied and whether projected ROAS improves — not held-out prediction accuracy.
+
+### 2.3 Asymmetric Budget Allocation — Not Uniform Scaling
+
+The naive budget fix when a campaign overspends by 3× is to divide all bids by 3. This penalises high-ROAS cash-cows identically to money-losing keywords — a fundamental failure.
+
+**The correct approach:** each keyword receives a share of the campaign's daily budget proportional to its efficiency score. High-score keywords get more; low-score keywords get less. The bid follows mechanically:
+
+```
+score_weight_k   = keyword_score_k / sum(keyword_scores in campaign)
+allocated_spend  = score_weight_k × campaign_daily_budget
+recommended_bid  = allocated_spend / avg_daily_clicks_k
 ```
 
-## Running the Optimizer
-```bash
-python main.py
+Budget constraint is satisfied by construction, before any individual bid is computed.
+
+### 2.4 LLM Integration — Load-Bearing for Sparse Keywords
+
+For data-rich keywords, a purely behavioural efficiency score (ROAS, CVR, CTR) works well. For keywords with thin or zero history, behavioural features are undefined — a purely data-driven system silently assigns them zero budget forever.
+
+**Hybrid efficiency score:**
+
 ```
-Outputs recommended bids for each keyword to stdout and saves `bid_recommendations.csv`.
-
-## Full Walkthrough
-Open `bid_optimizer.ipynb` in Jupyter for the complete explanation of the algorithm, assumptions, and reasoning:
-```bash
-jupyter notebook bid_optimizer.ipynb
+keyword_score = (confidence × behavioral_score)
+              + ((1 − confidence) × llm_specificity_score)
+              + llm_margin_modifier
+              + llm_funnel_modifier
 ```
 
-## Approach Summary
-- **Part A**: Bid optimization algorithm using ROAS-based bid scaling with statistical confidence weighting for low-data keywords, subject to campaign budget constraints and bid bounds [$0.20, $15.00].
-- **Part B**: Uncertainty handling — conservative bid adjustment for keywords with insufficient data.
-- **Part C**: Extension — see notebook for the chosen extension and implementation.
+Where `llm_specificity_score` is the embedding-derived centroid distance (how semantically specific the keyword is), and the modifiers are small additive terms from Claude's structured metadata.
 
-## Assumptions & Trade-offs
-See the notebook cells under each part for detailed reasoning.
+- `confidence = 1` → 100% behavioural signal, LLM has zero weight
+- `confidence = 0` → 100% LLM prior, sole allocation signal for zero-history keywords
+
+The LLM is not decoration. Remove it and every sparse keyword gets zero budget regardless of semantic potential. "Noise cancelling headphones" (high commercial intent) would be treated identically to "what is bluetooth" (informational).
+
+### 2.5 Architecture Summary
+
+| Decision | Reason |
+|---|---|
+| Full 30-day window, no split | Operational optimisation — use best available signal |
+| Portfolio allocation, not pointwise | Keywords share a budget pool — isolation violates the constraint |
+| Asymmetric score-weighted allocation | Protects cash-cows, cuts money-losers — symmetric scaling destroys value |
+| Hybrid behavioural + LLM score | LLM is primary signal for sparse/cold-start keywords |
+| ±50% stability cap | Business trust — erratic changes erode advertiser confidence |
+
+> Full business reasoning and derivation: **Section 1–2** in [bid_optimizer.ipynb](bid_optimizer.ipynb)
+
+---
+
+## 3. Data Investigation — Questions & Findings
+
+Before implementing anything, the data must answer specific questions that calibrate the algorithm. Each question flows from a design decision above.
+
+### Q1 — Missing Data: Random or Informative?
+
+**Finding:** No structural missing values. 186 of 200 keywords appear all 30 days; 2 keywords appear ~3 days. 54% of rows have zero revenue — valid negative signal (keyword ran, nobody converted), not missing data.
+
+**Decision:** Aggregate over `days_active` (not calendar days). A keyword that ran 10 of 21 days at $5/day has `avg_daily_spend = $5`, not $50/21 = $2.38. The underestimate propagates directly into budget enforcement errors.
+
+### Q2 — Conversion Sparsity: How Much Own-Data ROAS Signal Do We Have?
+
+**Finding:** 87% of keywords have ≥10 conversions over 30 days. Only 3 keywords (2%) have zero conversions. 99% have ≥100 clicks. This is a data-rich portfolio.
+
+**Decision:** Own-data ROAS is reliable for the vast majority. The LLM prior is a fallback for the 3% edge cases — not the main mechanism. Confidence thresholds of 30 clicks and 7 active days yield confidence ≈ 1 for nearly the entire portfolio, which is correct. Also rules out DNN: 200 keyword-level observations is far too small for neural networks on tabular data.
+
+### Q3 — Bid Variability: Does `current_bid` Change?
+
+**Finding:** 96% of keywords have 3+ unique bid values over 30 days — bids are actively adjusted. Only 7 keywords have static bids.
+
+**Decision:** Despite variation, 3–5 distinct bid values is insufficient to learn a reliable per-keyword bid-response curve. Too sparse, too noisy (day-of-week effects, competitor changes). Confirms the portfolio allocation approach — derive bid from budget share, not from curve-fitting.
+
+### Q4 — ROAS Distribution
+
+**Finding:** Range 0.1–9.7, std > mean (high variance), median below 1 — most keywords are currently losing money or barely breaking even.
+
+**Decision:** The high variance confirms the ±50% change cap — raw ROAS ratios would suggest 5×–10× bid changes that would destabilise campaigns. The wide spread means score-weighted allocation creates meaningful differentiation: top-ROAS keywords will receive substantially more budget.
+
+### Q5 — Categorical Balance
+
+**Finding:** Match types balanced (broad 28%, phrase 36%, exact 35%). Campaign sizes 11–27 keywords.
+
+**Decision:** No special encoding or grouping needed.
+
+### Q6 — Budget Utilisation (Most Critical Finding)
+
+**Finding:** Every campaign is over its daily budget. Range: 1.6× (Beauty) to 4.8× (Pet Supplies, $572/day against a $120 budget). No exceptions.
+
+**Decision:** Budget enforcement is the dominant output force. Every recommended bid will be substantially lower than the current bid. The accuracy of `avg_daily_clicks × recommended_bid` as projected spend is critical — this directly drives whether the budget constraint is met.
+
+### Q7 — Temporal Trend in ROAS
+
+**Finding:** Spearman r = 0.17, p = 0.36 — no statistically significant trend. Daily fluctuation is noise.
+
+**Decision:** Flat 30-day aggregation is valid. No recency weighting needed.
+
+> Full code, visualisations, and per-finding outputs: **Section 3** in [bid_optimizer.ipynb](bid_optimizer.ipynb)
+
+---
+
+## 4. From EDA to Algorithm — Confidence Score Design
+
+The confidence score is the bridge between EDA findings and the hybrid score formula:
+
+```
+confidence = sqrt( min(total_clicks / 30, 1)  ×  min(days_active / 7, 1) )
+```
+
+- **Geometric mean** (not arithmetic): both click volume *and* temporal stability must hold. 500 clicks on a single day = near-zero temporal stability. The geometric mean captures this correctly.
+- **Thresholds are fixed** (30 clicks, 7 days), not derived from dataset statistics — avoids any future leakage risk and anchors to business domain knowledge about minimum reliable sample sizes.
+- **Q2 calibration:** 99% of keywords have ≥100 clicks and appear most/all 30 days → confidence ≈ 1 for nearly the entire portfolio → own-data ROAS dominates → correct.
+- **Q1 calibration:** 2 keywords with ~3 active days → day factor ≈ 0.43 → confidence ≈ 0.65 → blended score that leans more on LLM prior → appropriate caution.
+
+> Confidence score distributions by tier: **Section 4** in [bid_optimizer.ipynb](bid_optimizer.ipynb)
+
+---
+
+## 5. Model Architecture & Feature Engineering Plan
+
+This section translates every EDA finding into a concrete engineering decision. Each stage, each feature, and each formula is grounded in a specific observation from Section 3.
+
+### 5.0 Why a Score-Based Heuristic and Not a Classic ML Model
+
+This is a deliberate choice driven by three hard constraints the EDA exposed — not a shortcut.
+
+**Constraint 1 — No target variable (Q3)**
+Supervised learning requires a label: the "correct" bid for each keyword. We never observe that. We only observe revenue at the bids that were *actually* used. The counterfactual — "what would revenue have been at bid $2.50 instead of $1.80?" — is unobserved. Without counterfactual outcomes, there is no target to train against.
+
+**Constraint 2 — No bid-response curve (Q3)**
+The natural proxy target is a per-keyword bid elasticity curve: how does ROAS change as bid changes? This requires bid variation. Q3 found 3–5 unique bid values per keyword over 30 days — far too sparse to fit a reliable curve. Fitting a regression on 3–5 points with day-to-day noise (competitor activity, seasonality) would produce confident but meaningless coefficients.
+
+**Constraint 3 — Sample size rules out tabular ML (Q2)**
+After aggregation, we have ~200 keyword-level observations. Gradient boosting and neural networks on tabular data require thousands of samples to generalise. At 200 rows, any model complex enough to capture non-linear ROAS interactions would overfit immediately. Ridge regression is technically feasible but would simply re-learn what the score formula already encodes — no new information.
+
+**What the EDA pointed to instead**
+The correct framing is a **portfolio allocation problem, not a prediction problem**. The question is not "predict the optimal bid" — it is "given a fixed budget, which keywords deserve more of it?" That question is answered by ranking, not by regression. A well-calibrated score — grounded in ROAS, CVR, and semantic signal — gives the ranking. The bid follows mechanically from the allocated budget share.
+
+The LLM components (embedding specificity and Claude structured metadata) are where AI adds value that pure heuristics cannot: reading the raw keyword text to estimate commercial potential for keywords with no behavioural history. That is the load-bearing AI contribution — not wrapping a hand-coded formula in a neural network.
+
+> Full stage-by-stage walkthrough with formula derivations: **Section 5** in [bid_optimizer.ipynb](bid_optimizer.ipynb)
+
+```
+[ Stage 1: Behavioral Feature Engineering    ]
+                |
+                v
+[ Stage 2: Campaign Contextualization         ]
+                |
+                v
+[ Stage 3: LLM Semantic Feature Layer         ]
+                |
+                v
+[ Stage 4: Unified Keyword Score              ]
+                |
+                v
+[ Stage 5: Asymmetric Portfolio Optimization  ]
+                |
+                v
+[ Stage 6: Marketplace Compliance & Output    ]
+```
+
+---
+
+### Stage 1 — Behavioral Feature Engineering
+
+**Source:** EDA Q1, Q2, Q4, Q5, Q7
+
+The raw dataset (~6,000 rows) is collapsed into one row per keyword — a flat profile matrix feeding every downstream stage.
+
+**Critical rule from Q1:** all rates divide by `days_active = CountUnique(date)`, not by 30 calendar days. A keyword that ran 10 days and spent $50 total has `avg_daily_spend = $5.00`. Dividing by 30 gives $1.67 — a 3× underestimate that flows into Stage 5 and causes budget violations.
+
+| Feature | Formula | EDA Justification |
+|---|---|---|
+| `historical_roas` | total_revenue / total_spend | Q2: 87% of keywords have ≥10 conversions — ROAS is a reliable signal |
+| `cvr` | total_conversions / total_clicks | Q2: captures buyer quality independently of bid level |
+| `ctr` | total_clicks / total_impressions | Ad relevance proxy — lower weight; partially bid-driven |
+| `avg_daily_clicks` | total_clicks / days_active | Q1: informative absence rule; feeds projected spend in Stage 5 |
+| `avg_daily_spend` | total_spend / days_active | Q1: same informative absence rule |
+| `current_avg_bid` | mean(current_bid) over 30 days | Q7: no temporal trend — 30-day mean is stable; ±50% cap anchor |
+| `match_type` | Ordinal: exact=1.0, phrase=0.8, broad=0.5 | Q5: balanced distribution; ordering reflects specificity |
+| `confidence` | sqrt( min(clicks/30, 1) × min(days_active/7, 1) ) | Q1, Q2: geometric mean of click saturation × temporal stability |
+
+**Why geometric mean for confidence?** A keyword with 500 clicks on a single day has saturation but no temporal stability. Arithmetic mean gives 0.5. Geometric mean gives near-zero — correct, because one day of data is not trustworthy. Both dimensions must hold simultaneously.
+
+---
+
+### Stage 2 — Campaign Contextualization
+
+**Source:** EDA Q4 (ROAS std > mean)
+
+Absolute ROAS cannot rank keywords across campaigns — a ROAS of 2.0 is a top performer in one campaign and a laggard in another. The fix: express each keyword's performance relative to its own budget pool.
+
+```
+campaign_avg_roas  =  sum(campaign revenue) / sum(campaign spend)
+roas_vs_campaign   =  keyword historical_roas / campaign_avg_roas
+```
+
+- `roas_vs_campaign > 1` → outperforms campaign peers → deserves more budget
+- `roas_vs_campaign < 1` → underperforms → candidate for reduction
+
+This feature is what makes the scoring genuinely asymmetric across keywords within the same campaign.
+
+---
+
+### Stage 3 — LLM Semantic Feature Layer
+
+**Source:** Business constraint 5 (sparse data); Q2 (3 zero-conversion keywords); architectural decision 2.4
+
+Standard tabular features are structurally blind to commercial context. A tabular model cannot distinguish a high-margin luxury query from a low-margin commodity — they look identical until enough conversion data accumulates. The LLM layer reads the raw `keyword_text` to fill this gap.
+
+**Component A — Embedding Layer (fully offline, no API key)**
+
+Model: `all-MiniLM-L6-v2` via `sentence-transformers`. Runs locally, zero external dependencies.
+
+Each `keyword_text` is encoded into a 384-dimensional dense semantic vector. These embeddings power two distinct features:
+
+**A1 — Specificity Score (centroid distance)**
+
+Compute the centroid (mean vector) of all keyword embeddings. Score each keyword by its cosine distance from that centroid:
+- Far from centroid = semantically specific = long-tail, high-converting
+- Close to centroid = generic head term = high competition, lower conversion efficiency
+
+On Amazon, commercial intent is implicit in every search. The signal that differentiates keyword value is *specificity*, not intent. Centroid distance captures this with no hardcoded anchors.
+
+**A2 — Neighbor ROAS (KNN in embedding space)**
+
+For sparse keywords (low confidence), instead of relying solely on an LLM prior, we borrow the historical ROAS signal from semantically similar keywords that have rich data:
+
+1. For each keyword, find its k=5 nearest neighbors by cosine similarity in embedding space
+2. Compute similarity-weighted average ROAS from those neighbors:
+
+```
+neighbor_roas = sum(similarity_i × historical_roas_i) / sum(similarity_i)
+```
+
+**Why this matters:** a keyword with 3 days of history doesn't get a pure LLM estimate — it gets the actual earned ROAS of the 5 most semantically similar keywords in the portfolio, weighted by how similar they are. Specificity tells you *how long-tail* the keyword is; neighbor ROAS tells you *what similar keywords actually earned*. Together they form a cold-start prior grounded in real data.
+
+---
+
+**Component B — Claude Structured Metadata (API, cached to JSON)**
+
+Model: `claude-haiku-4-5-20251001`. Called once per unique keyword, cached to `keyword_metadata_cache.json`. Every subsequent run loads from cache — zero latency, fully reproducible.
+
+**The cache is committed to the repository.** Reviewers reproduce results without an API key. Keywords absent from cache fall back to Component A only — graceful degradation, not a hard failure.
+
+```json
+{
+  "margin_tier":           "premium | mid-range | commodity",
+  "funnel_stage":          "awareness | consideration | decision",
+  "competition_intensity": "low | medium | high"
+}
+```
+
+**Why these three fields:**
+
+- **`margin_tier`:** The optimal bid ceiling is a function of margin — a bid profitable for a premium product is a money-loser for a commodity. Tabular ROAS cannot separate margin from volume. Claude can.
+- **`funnel_stage`:** Decision-stage keywords convert immediately; awareness-stage keywords require multiple exposures. Budget should concentrate where conversion is imminent.
+- **`competition_intensity`:** Determines the bid *floor* needed to win auctions at all — not a score component. Feeds the bid floor modifier in Stage 5.
+
+---
+
+### Stage 4 — Unified Keyword Score
+
+**Source:** All EDA findings converging
+
+The score is a single continuous number summarising each keyword's expected ROI. It is the sole input to Stage 5.
+
+**Behavioral component — weighted additive sum:**
+
+```
+behavioral_score = 0.60 × roas_vs_campaign_norm
+                 + 0.25 × cvr_norm
+                 + 0.15 × match_type_factor
+```
+
+Each term is **percentile-rank normalised** within the full dataset before blending, placing all factors on [0, 1]. Weights reflect the optimization target: ROAS dominates (0.60) because it is the metric being optimised; CVR (0.25) captures buyer quality independent of bid level; match type (0.15) acts as a prior on specificity.
+
+**Why not CTR?** CTR is partially bid-driven — a higher bid wins better ad placement, which mechanically inflates CTR regardless of keyword quality. Including it in the score would reward keywords for spending more. Retained as a diagnostic column only.
+
+**Why additive, not multiplicative?** Multiplication collapses to zero if any single term is weak — a keyword with zero conversions and good ROAS would score zero regardless of potential. The weighted sum ensures each signal contributes independently.
+
+**Hybrid score formula:**
+
+```
+keyword_score = confidence × behavioral_score
+              + (1 − confidence) × (0.60 × neighbor_roas_norm + 0.40 × llm_specificity)
+              + llm_margin_modifier
+              + llm_funnel_modifier
+```
+
+When `confidence` is low, the score falls back to a blend of two semantic signals: `neighbor_roas_norm` (actual earned ROAS of the 5 most similar keywords, 0.60 weight) and `llm_specificity` (how long-tail the keyword is, 0.40 weight). The KNN lookup is what makes the embedding layer genuinely load-bearing for sparse keywords.
+
+**LLM modifier values:**
+
+| Field | Value | Modifier |
+|---|---|---|
+| `margin_tier` | commodity | +0.00 |
+| `margin_tier` | mid_range | +0.05 |
+| `margin_tier` | premium | +0.10 |
+| `funnel_stage` | awareness | +0.00 |
+| `funnel_stage` | consideration | +0.05 |
+| `funnel_stage` | decision | +0.10 |
+
+`competition_intensity` is **not** a score additive — it feeds the bid floor modifier in Stage 5.
+
+**The confidence weight is the load-bearing mechanism:**
+
+| confidence | interpretation | score driven by |
+|---|---|---|
+| 1.0 | data-rich | 100% historical ROAS, CVR, match type |
+| 0.5 | moderate data | 50% behavioral + 50% LLM specificity |
+| 0.0 | zero history | 100% LLM semantic prior |
+
+**Stability cap applied immediately after scoring:**
+
+```
+raw_bid = clip(raw_bid, current_avg_bid × 0.5, current_avg_bid × 1.5)
+```
+
+---
+
+### Stage 5 — Asymmetric Portfolio Optimization
+
+**Source:** EDA Q6 (all 10 campaigns 1.6×–4.8× over budget)
+
+Symmetric scaling (divide all bids by the same factor) destroys the efficiency rank-ordering — the best and worst keywords are cut equally, wiping out everything Stages 1–4 computed.
+
+**Step 1 — Score-to-bid derivation (budget satisfied by construction):**
+
+```
+expected_clicks = max(avg_daily_clicks, 0.5)   # floor prevents division by zero
+raw_bid = (keyword_score / sum(campaign_keyword_scores)) × campaign_daily_budget / expected_clicks
+```
+
+`avg_daily_clicks` can be zero for keywords with impressions but no clicks. A floor of 0.5 avoids division-by-zero while keeping the budget allocation meaningful. These keywords are flagged in the reason column.
+
+**Step 2 — Stability cap:**
+
+```
+raw_bid = clip(raw_bid, current_avg_bid × 0.50, current_avg_bid × 1.50)
+```
+
+Applied here — after bid derivation, not in Stage 4 where no bid exists yet. The floor modifier in Step 3 can still override this cap from below if needed.
+
+**Step 3 — Competition bid floor modifier:**
+
+```
+floor_bid = max(0.20, 0.20 × (1 + 0.15 × competition_ordinal))
+```
+
+where `competition_ordinal`: low = 0, medium = 1, high = 2.
+Floor values: low → $0.20, medium → $0.23, high → $0.26.
+
+`competition_intensity` is not a score component — it sets the minimum bid needed to enter the auction, not the relative ranking of keywords.
+
+**Step 4 — Asymmetric safety slash (if campaign still over budget after rounding):**
+
+1. Compute `projected_spend = raw_bid × avg_daily_clicks` per keyword
+2. If `sum(projected_spend) ≤ campaign_daily_budget` → no action needed
+3. If over budget — asymmetric slash:
+   - Sort keywords by `keyword_score` ascending (worst first)
+   - Drive the lowest-score keyword's bid down toward its `floor_bid`
+   - **`floor_bid` enforced inside the loop** — never go below on any iteration
+   - Recompute projected spend after each reduction using the floored bid
+   - Stop as soon as the campaign is within budget
+   - **High-score keywords are never touched**
+
+**Why the floor must be enforced inside the loop, not after:** if bids were allowed to go below `floor_bid` during optimization and then clipped back up at a later stage, those upward corrections would increase projected spend and re-violate the budget constraint the loop just satisfied.
+
+**Edge case — budget floor exceeded:** if every keyword reaches its `floor_bid` and projected spend still exceeds the daily budget, the constraint cannot be satisfied — the campaign's minimum possible spend is above its budget. In this case: leave all keywords at `floor_bid` and flag the campaign in the reason column.
+
+**Safety net:** if the slash loop completes but projected spend is still marginally over budget due to the floor constraint, apply proportional scale-down to the whole campaign, again enforcing `floor_bid` per keyword after scaling.
+
+---
+
+### Stage 6 — Marketplace Compliance & Output
+
+- **Ceiling clip only:** `recommended_bid = min(bid, 15.00)` — the $0.20 floor is already guaranteed by Stage 5's loop. The only remaining compliance risk is bids above $15.00, which the stability cap (`current_avg_bid × 1.5`) can produce for high-bid keywords.
+- Reason column: one sentence per keyword — key signals, budget action, and whether the score was LLM-primary
+- Output: `keyword_id`, `keyword_text`, `current_avg_bid`, `recommended_bid`, `reason_or_score` → `bid_recommendations.csv`
+
+> Full implementation with code and output samples: **Section 6** (Stages 1–2), **Section 7** (Stage 3), **Section 8** (Stages 4–5), **Section 9** (Stage 6) in [bid_optimizer.ipynb](bid_optimizer.ipynb)
+
+---
+
+### Complete Feature Plan
+
+| Feature | Stage | Type | Formula / Source | EDA Anchor |
+|---|---|---|---|---|
+| `historical_roas` | 1 | Behavioral | total_revenue / total_spend | Q2 |
+| `cvr` | 1 | Behavioral | total_conversions / total_clicks | Q2 |
+| `ctr` | 1 | Diagnostic | total_clicks / total_impressions | Diagnostic only — bid-driven, excluded from score |
+| `avg_daily_clicks` | 1 | Behavioral | total_clicks / days_active | Q1 |
+| `avg_daily_spend` | 1 | Behavioral | total_spend / days_active | Q1 |
+| `current_avg_bid` | 1 | Anchor | mean(current_bid) | Stability cap anchor |
+| `match_type_factor` | 1 | Ordinal | exact=1.0, phrase=0.8, broad=0.5 | Q5 |
+| `confidence` | 1 | Weight | sqrt(clicks/30 × days/7), capped at 1 | Q1, Q2 |
+| `campaign_avg_roas` | 2 | Context | spend-weighted ROAS per campaign | Q4 |
+| `roas_vs_campaign` | 2 | Relative | historical_roas / campaign_avg_roas | Q4 |
+| `llm_specificity` | 3A | Semantic | cosine distance from embedding centroid | Long-tail vs generic |
+| `neighbor_roas` | 3A | Semantic | similarity-weighted ROAS of k=5 nearest neighbors in embedding space | Cold-start prior from real historical data |
+| `llm_margin_tier` | 3B | Semantic | Claude JSON → commodity=+0.00, mid_range=+0.05, premium=+0.10 | Margin blind spot |
+| `llm_funnel_stage` | 3B | Semantic | Claude JSON → awareness=+0.00, consideration=+0.05, decision=+0.10 | Conversion proximity |
+| `llm_competition` | 3B | Floor mod | Claude JSON → floor: low=$0.20, medium=$0.23, high=$0.26 | Bid floor only — not a score component |
+
+---
+
+## Part B — Reasoning About Uncertainty
+
+### How the algorithm handles sparse data
+
+The confidence-weighted hybrid score handles this continuously. `confidence = 0` means the LLM prior is the sole signal — the keyword still receives a principled budget allocation based on semantic commercial potential, not zero. As data accumulates over cycles, `confidence` rises automatically and the blend shifts toward behavioural signal. No special-case logic required.
+
+### What could go wrong in production
+
+**Feedback loops.** Raise bid → more impressions → noisy week with no conversions → score falls → bid cut → fewer impressions. The ±50% cap slows oscillation; a production system should also flag keywords that reverse direction in consecutive cycles.
+
+**Data pipeline failures.** Duplicate rows, missing days, or tracking outages cause confidently wrong scores. Mitigation: strict input validation before every cycle (row count bounds, date coverage, revenue/spend ratio checks). On validation failure: hold all bids, alert.
+
+**LLM model drift.** An upstream model update shifts `estimated_efficiency` values discontinuously. Mitigation: version-lock the model. Re-enrich all keywords on any model change.
+
+**LLM miscalibration on niche products.** World-knowledge priors can be wrong for unusual categories. Flag LLM-primary recommendations in the `reason` column for manual review in early cycles.
+
+### How to measure success
+
+**Primary:** Portfolio ROAS (total revenue / total spend) week-over-week post-launch.
+
+**Secondary:** Budget utilisation per campaign, bid oscillation rate (direction reversals), percentage of keywords hitting hard bounds.
+
+**Evaluation horizon:** Minimum four weeks of live data. Amazon attribution windows up to 14 days mean week-1 ROAS is understated.
+
+> Implementation details: **Section 6** in [bid_optimizer.ipynb](bid_optimizer.ipynb)
+
+---
+
+## Part C — Cold-Start for New Keywords
+
+Cold-start is native to the architecture — no special-case logic required. A zero-history keyword has `confidence = 0`, so `keyword_score = llm_efficiency` entirely. It participates in the same score-weighted budget allocation as every other keyword. The LLM prior determines its initial budget share; as clicks and conversions accumulate over subsequent cycles, the blend automatically shifts toward behavioural signal.
+
+**Bootstrapping a new campaign:** provide the new keywords to the LLM enrichment step, specify expected daily clicks (or use a conservative default), and run the allocation. The system naturally gives more budget to high-intent keywords and less to informational ones — even with zero data.
+
+> Worked example with a 5-keyword new campaign: **Section 7** in [bid_optimizer.ipynb](bid_optimizer.ipynb)
+
+---
+
+## Key Assumptions
+
+| Assumption | Reasoning |
+|---|---|
+| Daily batch refresh | Daily data granularity + CSV output + one-shot script |
+| Full 30-day window | Operational optimisation — all data is relevant, no future leakage risk |
+| `current_avg_bid` = mean of `current_bid` over 30 days | More stable than last-day bid; used as stability anchor for ±50% cap |
+| Absent days = informative absence | Budget exhausted or auction lost, not random |
+| Zero-revenue rows = valid negative signal | Keyword ran, nobody converted |
+| Budget enforcement projects `avg_daily_clicks × bid` | Assumes click volume is stable; large bid changes may shift click volume in practice |
+
+---
+
+## Trade-offs
+
+**Proportional allocation over optimal LP.** Score-weighted allocation is O(n) and fully interpretable. A true optimum would solve `max ∑ ROAS_k·spend_k subject to ∑ spend_k ≤ budget` — more precise but opaque and harder to explain to advertisers.
+
+**±50% cap accepts slower convergence.** A severely undervalued keyword needs multiple cycles to reach its optimal bid. Intentional — large jumps produce noisy ROAS estimates.
+
+**LLM prior is world-knowledge, not client-specific.** Niche or seasonal categories may be miscalibrated. Flagged in `reason` column.
+
+**Safety-net proportional scaling.** When stability caps push projected spend above budget, a uniform scale-down is applied as a last resort. Acceptable because the score-ranked ordering is already protected by the allocation step.
