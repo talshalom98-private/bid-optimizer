@@ -131,10 +131,13 @@ class BidOptimizer:
         sim_matrix = cos_sim(embeddings)
         np.fill_diagonal(sim_matrix, 0.0)
         roas_vals = kw["historical_roas"].values
+        conf_vals = kw["confidence"].values
         neighbor_roas = []
         for i in range(len(kw)):
             top_k   = np.argsort(sim_matrix[i])[-KNN_K:]
-            weights = sim_matrix[i][top_k]
+            # weight by similarity × neighbor confidence so sparse neighbors
+            # (low confidence, unreliable ROAS) contribute proportionally less
+            weights = sim_matrix[i][top_k] * conf_vals[top_k]
             nr = ((weights * roas_vals[top_k]).sum() / weights.sum()
                   if weights.sum() > 0 else roas_vals.mean())
             neighbor_roas.append(nr)

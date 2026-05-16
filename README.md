@@ -310,10 +310,10 @@ For sparse keywords (low confidence), instead of relying solely on an LLM prior,
 2. Compute similarity-weighted average ROAS from those neighbors:
 
 ```
-neighbor_roas = sum(similarity_i × historical_roas_i) / sum(similarity_i)
+neighbor_roas = sum(similarity_i × confidence_i × historical_roas_i) / sum(similarity_i × confidence_i)
 ```
 
-**Why this matters:** a keyword with 3 days of history doesn't get a pure LLM estimate — it gets the actual earned ROAS of the 5 most semantically similar keywords in the portfolio, weighted by how similar they are. Specificity tells you *how long-tail* the keyword is; neighbor ROAS tells you *what similar keywords actually earned*. Together they form a cold-start prior grounded in real data.
+**Why this matters:** a keyword with 3 days of history doesn't get a pure LLM estimate — it gets the actual earned ROAS of the 5 most semantically similar keywords in the portfolio, weighted by both similarity and each neighbor's confidence. A sparse neighbor with 2 clicks (low confidence, unreliable ROAS) contributes proportionally less than a data-rich neighbor. If all neighbors are sparse, the prior falls back to the portfolio mean. Specificity tells you *how long-tail* the keyword is; neighbor ROAS tells you *what similar, data-rich keywords actually earned*. Together they form a cold-start prior grounded in real data.
 
 ---
 
