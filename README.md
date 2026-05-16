@@ -590,6 +590,8 @@ ROAS improves across all 10 campaigns — no campaign is sacrificed to boost ano
 
 **How the improvement happens:** the algorithm stops spending money on keywords that lose money (cuts their bids to the $0.20 floor) and gives that budget to keywords that are already profitable. Spending less in total but only on the right keywords produces a higher return per dollar — which is exactly what ROAS measures.
 
+**Why this is not data leakage.** Traditional data leakage means using information at model-build time that wouldn't exist at prediction time. That is not the case here — we use 30 days of historical data to produce a recommendation for the *next* day; no future information touches the scoring or bid derivation. The offline simulation then asks a counterfactual question ("what would ROAS have been if these bids had been used over the past 30 days?") using the same window. This is the standard validation approach for operational bid optimizers where no live holdout is available. The improvement looks large because the baseline was computed from campaigns spending 1.6×–4.8× over budget — the starting point was artificially bad. The real test is a live A/B holdout, described in Part B.
+
 **Known limitations of this proxy:**
 - Revenue-per-click is assumed constant — real auctions are dynamic and competitor bids react
 - The elasticity exponent (0.1) is a conservative approximation, not a fitted bid-response curve (fitting a curve requires much more bid variation than 3–5 values per keyword — see Section 5.0)
