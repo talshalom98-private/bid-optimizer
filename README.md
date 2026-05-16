@@ -561,7 +561,16 @@ predicted_spend     = recommended_bid × avg_daily_clicks × 30
 predicted_revenue   = predicted_spend × revenue_per_click × (recommended_bid / current_avg_bid)^0.1
 ```
 
-The `(bid_new / bid_old)^0.1` term is a **diminishing-returns elasticity factor**. It makes the simulation conservative: raising a bid by 50% only increases revenue efficiency by ~4%, not 50%. This penalises aggressive upward moves and prevents the simulation from overstating the improvement.
+The `(bid_new / bid_old)^0.1` term is a **diminishing-returns elasticity factor** modelling the relationship between bid level and revenue efficiency. The exponent 0.1 was chosen deliberately to be conservative:
+
+| Bid change | Factor | Revenue efficiency change |
+|---|---|---|
+| −50% | 0.5^0.1 | −6.7% |
+| no change | 1.0^0.1 | 0% |
+| +50% | 1.5^0.1 | +4.1% |
+| +100% | 2.0^0.1 | +7.2% |
+
+A doubling of the bid produces only ~7% more revenue efficiency — close to flat. This is intentional: real bid-response curves on Amazon are typically inelastic in the short run (competitors react, Quality Score adjusts). An exponent of 0.5 would imply a 41% revenue gain from doubling the bid — far too optimistic for a one-cycle change. The 0.1 exponent is a lower-bound assumption: if the simulation shows improvement under this conservative penalty, the true improvement is likely at least as large.
 
 **Results:**
 
