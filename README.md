@@ -455,7 +455,7 @@ Floor values: low → $0.20, medium → $0.23, high → $0.26.
 
 - **Ceiling clip only:** `recommended_bid = min(bid, 15.00)` — the $0.20 floor is already guaranteed by Stage 5's loop. The only remaining compliance risk is bids above $15.00, which the stability cap (`current_avg_bid × 1.5`) can produce for high-bid keywords.
 - Reason column: one sentence per keyword — key signals, budget action, and whether the score was LLM-primary
-- Output: `keyword_id`, `keyword_text`, `current_avg_bid`, `recommended_bid`, `reason_or_score` → `bid_recommendations.csv`
+- Output: `keyword_id`, `keyword_text`, `current_avg_bid`, `recommended_bid`, `reason` → `bid_recommendations.csv`
 
 > Full implementation with code and output samples: **Section 6** (Stages 1–2), **Section 7** (Stage 3), **Section 8** (Stages 4–5), **Section 9** (Stage 6) in [bid_optimizer.ipynb](bid_optimizer.ipynb)
 

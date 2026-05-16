@@ -286,9 +286,10 @@ class BidOptimizer:
         kw_opt  = pd.concat(results).reset_index(drop=True)
 
         kw_opt["recommended_bid"] = kw_opt["raw_bid"].clip(upper=BID_MAX).round(2)
-        kw_opt["reason_or_score"] = kw_opt.apply(self._build_reason, axis=1)
+        kw_opt["current_avg_bid"] = kw_opt["current_avg_bid"].round(2)
+        kw_opt["reason"]          = kw_opt.apply(self._build_reason, axis=1)
 
         return kw_opt[[
             "keyword_id", "keyword_text", "current_avg_bid",
-            "recommended_bid", "reason_or_score",
+            "recommended_bid", "reason",
         ]]
