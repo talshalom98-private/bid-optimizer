@@ -264,7 +264,7 @@ class BidOptimizer:
             f"margin={_MARGIN_LABELS.get(row['llm_margin_mod'],'mid-range')}, "
             f"funnel={_FUNNEL_LABELS.get(row['llm_funnel_mod'],'consideration')}")
 
-        change_pct = (row["recommended_bid"] / row["current_avg_bid"] - 1) * 100
+        change_pct = (row["recommended_bid"] / row["current_avg_bid"] - 1) * 100 if row["current_avg_bid"] > 0 else 0
         if row["recommended_bid"] <= row["floor_bid"] + 0.01:
             parts.append("bid at marketplace floor (budget constraint)")
         elif change_pct >= 40:
